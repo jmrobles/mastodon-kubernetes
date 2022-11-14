@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  mastodon
+  namespace: mastodon
+  labels:
+    app:  mastodon
+spec:
+  selector:
+    matchLabels:
+      app: mastodon
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  mastodon
+    spec:
+      initContainers:
+      - name: migration
+        image:  tootsuite/mastodon:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+        command: ["bash", "-c", "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails db:migrate"]
+        envFrom:
+          - secretRef:
+              name: mastodon-secrets
+          - configMapRef:
+              name: mastodon-config
+      containers:
+      - name:  mastodon
+        image:  tootsuite/mastodon:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+        command: ["bash", "-c", "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p 3000"]
+        envFrom:
+          - secretRef:
+              name: mastodon-secrets
+          - configMapRef:
+              name: mastodon-config
+        ports:
+        - containerPort:  3000
+          name:  mastodon
+      - name:  mastodon-sidekiq
+        image:  tootsuite/mastodon:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+        command: ["bash", "-c", "bundle exec sidekiq -c 25"]
+        envFrom:
+          - secretRef:
+              name: mastodon-secrets
+          - configMapRef:
+              name: mastodon-config
+      - name:  mastodon-streaming
+        image:  tootsuite/mastodon:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 1000m
+            memory: 1024Mi
+        command: ["bash", "-c", "/opt/node/bin/node ./streaming"]
+        envFrom:
+          - secretRef:
+              name: mastodon-secrets
+          - configMapRef:
+              name: mastodon-config
+        ports:
+        - containerPort:  4000
+          name:  streaming
+      restartPolicy: Always

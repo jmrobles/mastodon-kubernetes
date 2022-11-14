@@ -1,0 +1,52 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: mastodon-config
+  namespace: mastodon
+data:
+  # Main settings
+  LOCAL_DOMAIN: example.com
+  WEB_DOMAIN: mastodon.example.com
+
+  # Redis
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+
+  # Postgres
+  DB_HOST: postgres
+  DB_USER: mastodon
+  DB_NAME: mastodon_production
+  DB_PORT: "5432"
+
+  # Elastic
+  ES_ENABLED: "true"
+  ES_HOST: elastic
+  ES_PORT: "9200"
+
+  # SMTP
+  SMTP_SERVER: smtp-server
+  SMTP_PORT: "587"
+  SMTP_FROM_ADDRESS: no-reply@mastodon.example.com
+
+  # File storage
+  S3_ENABLED: "true"
+  S3_BUCKET: s3.example.com/mastodon
+  S3_HOST: s3.example.com
+  S3_PROTOCOL: https
+  S3_HOSTNAME: s3.example.com
+  S3_ENDPOINT: https://s3.example.com
+  S3_OVERRIDE_PATH_STYLE: "false"
+  
+  # Streaming
+  NODE_ENV: production
+  PORT: "4000"
+  STREAMING_CLUSTER_NUM: "1"
+
+  # Others
+  IP_RETENTION_PERIOD: "31556952"
+  SESSION_RETENTION_PERIOD: "31556952"
+  RAILS_ENV: production
+  RAILS_SERVE_STATIC_FILES: "true"
+  RAILS_LOG_LEVEL: warn
+  DEFAULT_LOCALE: en
+

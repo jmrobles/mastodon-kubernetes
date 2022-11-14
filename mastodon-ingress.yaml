@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mastodon-svc
+  namespace: mastodon
+spec:
+  selector:
+    app: mastodon
+  type: ClusterIP
+  ports:
+  - name: mastodon-web-port
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
+  - name: mastodon-streaming-port
+    protocol: TCP
+    port: 4000
+    targetPort: 4000
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mastodon-ingress
+  namespace: mastodon
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+      - mastodon.example.com
+    secretName: mastodon-tls
+  rules:
+  - host: mastodon.example.com
+    http:
+      paths:
+      - path: /api/v1/streaming 
+        pathType: Prefix
+        backend:
+          service:
+            name: mastodon-svc
+            port:
+              number: 4000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: mastodon-svc
+            port:
+              number: 3000
